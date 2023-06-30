@@ -7,7 +7,18 @@ class NewItemForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
+
+    void saveItem() {
+      formKey.currentState!.validate();
+    }
+
+    void resetItem() {
+      formKey.currentState!.reset();
+    }
+
     return Form(
+      key: formKey,
       child: Column(
         children: [
           TextFormField(
@@ -18,6 +29,13 @@ class NewItemForm extends StatelessWidget {
               ),
             ),
             validator: (value) {
+              if (value == null ||
+                  value.isEmpty ||
+                  value.trim().length < 2 ||
+                  value.trim().length > 50) {
+                return 'Must be between 1 and 50 characters.';
+              }
+
               return null;
             },
           ),
@@ -31,7 +49,18 @@ class NewItemForm extends StatelessWidget {
                       'Quantity',
                     ),
                   ),
+                  keyboardType: TextInputType.number,
                   initialValue: '1',
+                  validator: (value) {
+                    if (value == null ||
+                        value.isEmpty ||
+                        int.tryParse(value) == null ||
+                        int.parse(value) <= 0) {
+                      return 'Must be a valid positive number.';
+                    }
+
+                    return null;
+                  },
                 ),
               ),
               const SizedBox(
@@ -39,21 +68,21 @@ class NewItemForm extends StatelessWidget {
               ),
               Expanded(
                 child: DropdownButtonFormField(items: [
-                  for (final category in categories.entries)
+                  for (final category in categories.values)
                     DropdownMenuItem(
-                      value: category.value,
+                      value: category,
                       child: Row(
                         children: [
                           Container(
                             width: 16,
                             height: 16,
-                            color: category.value.color,
+                            color: category.color,
                           ),
                           const SizedBox(
                             width: 10,
                           ),
                           Text(
-                            category.value.title,
+                            category.title,
                           ),
                         ],
                       ),
@@ -69,14 +98,14 @@ class NewItemForm extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () {},
+                onPressed: resetItem,
                 child: const Text('Reset'),
               ),
               const SizedBox(
                 width: 10,
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: saveItem,
                 child: const Text('Add Item'),
               )
             ],
