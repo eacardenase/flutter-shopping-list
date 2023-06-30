@@ -31,10 +31,11 @@ class _GroceryScreenState extends State<GroceryScreen> {
         ),
         actions: [
           IconButton(
-              onPressed: () => _addItem(context),
-              icon: const Icon(
-                Icons.add,
-              ))
+            onPressed: () => _addItem(context),
+            icon: const Icon(
+              Icons.add,
+            ),
+          )
         ],
       ),
       body: GroceryList(
