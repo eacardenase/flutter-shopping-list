@@ -32,6 +32,32 @@ class _GroceryScreenState extends State<GroceryScreen> {
     });
   }
 
+  void _removeItem(int index, GroceryItem item) {
+    setState(() {
+      _groceryItems.remove(item);
+    });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(
+          seconds: 2,
+        ),
+        content: const Text(
+          'Grocery Item deleted!',
+        ),
+        action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              setState(() {
+                _groceryItems.insert(index, item);
+              });
+            }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget mainContent = const Center(
@@ -46,6 +72,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
     if (_groceryItems.isNotEmpty) {
       mainContent = GroceryList(
         groceryItems: _groceryItems,
+        onRemoveItem: _removeItem,
       );
     }
 
