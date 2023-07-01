@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
+import 'package:shopping_list/models/grocery_item.dart';
 
 class NewItemForm extends StatelessWidget {
   const NewItemForm({super.key});
@@ -19,11 +20,14 @@ class NewItemForm extends StatelessWidget {
       if (isValid) {
         formKey.currentState!.save();
 
-        print({
-          enteredName,
-          enteredQuantity,
-          selectedCategory!.title,
-        });
+        Navigator.of(context).pop(
+          GroceryItem(
+            id: DateTime.now().toString(),
+            name: enteredName,
+            quantity: enteredQuantity,
+            category: selectedCategory!,
+          ),
+        );
       }
     }
 
