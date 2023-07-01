@@ -34,6 +34,21 @@ class _GroceryScreenState extends State<GroceryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget mainContent = const Center(
+      child: Text(
+        'No groceries found. Start adding some!',
+        style: TextStyle(
+          fontSize: 16,
+        ),
+      ),
+    );
+
+    if (_groceryItems.isNotEmpty) {
+      mainContent = GroceryList(
+        groceryItems: _groceryItems,
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -48,9 +63,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
           )
         ],
       ),
-      body: GroceryList(
-        groceryItems: _groceryItems,
-      ),
+      body: mainContent,
     );
   }
 }
