@@ -20,6 +20,7 @@ class GroceryScreen extends StatefulWidget {
 
 class _GroceryScreenState extends State<GroceryScreen> {
   List<GroceryItem> _groceryItems = [];
+  var _isLoading = true;
 
   void _getItems() async {
     final uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
@@ -47,6 +48,7 @@ class _GroceryScreenState extends State<GroceryScreen> {
 
     setState(() {
       _groceryItems = loadedItems;
+      _isLoading = false;
     });
   }
 
@@ -109,6 +111,12 @@ class _GroceryScreenState extends State<GroceryScreen> {
         ),
       ),
     );
+
+    if (_isLoading) {
+      mainContent = const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
     if (_groceryItems.isNotEmpty) {
       mainContent = GroceryList(

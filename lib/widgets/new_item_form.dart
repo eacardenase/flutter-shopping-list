@@ -8,21 +8,31 @@ import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 
-class NewItemForm extends StatelessWidget {
+class NewItemForm extends StatefulWidget {
   const NewItemForm({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-    var enteredName = '';
-    var enteredQuantity = 1;
-    var selectedCategory = categories[Categories.vegetables];
+  State<NewItemForm> createState() => _NewItemFormState();
+}
 
+class _NewItemFormState extends State<NewItemForm> {
+  final formKey = GlobalKey<FormState>();
+  var _enteredName = '';
+  var _enteredQuantity = 1;
+  var _selectedCategory = categories[Categories.vegetables];
+  var _isSendingRequest = false;
+
+  @override
+  Widget build(BuildContext context) {
     void saveItem() async {
       final isValid = formKey.currentState!.validate();
 
       if (isValid) {
         formKey.currentState!.save();
+
+        setState(() {
+          _isSendingRequest = true;
+        });
 
         var uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
             'shopping-list.json');
@@ -33,14 +43,11 @@ class NewItemForm extends StatelessWidget {
             'Content-Type': 'application/json',
           },
           body: json.encode({
-            'name': enteredName,
-            'quantity': enteredQuantity,
-            'category': selectedCategory!.title
+            'name': _enteredName,
+            'quantity': _enteredQuantity,
+            'category': _selectedCategory!.title
           }),
         );
-
-        print(response.body);
-        print(response.statusCode);
 
         final Map<String, dynamic> responseData = json.decode(response.body);
 
@@ -51,9 +58,9 @@ class NewItemForm extends StatelessWidget {
         Navigator.of(context).pop(
           GroceryItem(
               id: responseData['name'],
-              name: enteredName,
-              quantity: enteredQuantity,
-              category: selectedCategory!),
+              name: _enteredName,
+              quantity: _enteredQuantity,
+              category: _selectedCategory!),
         );
       }
     }
@@ -84,7 +91,7 @@ class NewItemForm extends StatelessWidget {
               return null;
             },
             onSaved: (value) {
-              enteredName = value!.trim();
+              _enteredName = value!.trim();
             },
           ),
           Row(
@@ -98,7 +105,7 @@ class NewItemForm extends StatelessWidget {
                     ),
                   ),
                   keyboardType: TextInputType.number,
-                  initialValue: enteredQuantity.toString(),
+                  initialValue: _enteredQuantity.toString(),
                   validator: (value) {
                     if (value == null ||
                         value.isEmpty ||
@@ -110,7 +117,7 @@ class NewItemForm extends StatelessWidget {
                     return null;
                   },
                   onSaved: (value) {
-                    enteredQuantity = int.parse(value!);
+                    _enteredQuantity = int.parse(value!);
                   },
                 ),
               ),
@@ -119,7 +126,7 @@ class NewItemForm extends StatelessWidget {
               ),
               Expanded(
                 child: DropdownButtonFormField(
-                  value: selectedCategory,
+                  value: _selectedCategory,
                   items: [
                     for (final category in categories.values)
                       DropdownMenuItem(
@@ -142,7 +149,7 @@ class NewItemForm extends StatelessWidget {
                       )
                   ],
                   onChanged: (value) {
-                    selectedCategory = value;
+                    _selectedCategory = value;
                   },
                 ),
               )
@@ -155,15 +162,21 @@ class NewItemForm extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: resetItem,
+                onPressed: _isSendingRequest ? null : resetItem,
                 child: const Text('Reset'),
               ),
               const SizedBox(
                 width: 10,
               ),
               ElevatedButton(
-                onPressed: saveItem,
-                child: const Text('Add Item'),
+                onPressed: _isSendingRequest ? null : saveItem,
+                child: _isSendingRequest
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(),
+                      )
+                    : const Text('Add Item'),
               )
             ],
           )
