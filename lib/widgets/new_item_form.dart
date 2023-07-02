@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+
+import 'package:http/http.dart' as http;
 
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
@@ -20,14 +24,20 @@ class NewItemForm extends StatelessWidget {
       if (isValid) {
         formKey.currentState!.save();
 
-        Navigator.of(context).pop(
-          GroceryItem(
-            id: DateTime.now().toString(),
-            name: enteredName,
-            quantity: enteredQuantity,
-            category: selectedCategory!,
-          ),
+        var uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
+            'shopping-list.json');
+
+        http.post(
+          uri,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'name': enteredName,
+            'quantity': enteredQuantity,
+            'category': selectedCategory!.title
+          }),
         );
+
+        // Navigator.of(context).pop();
       }
     }
 
