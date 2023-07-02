@@ -80,40 +80,33 @@ class _GroceryScreenState extends State<GroceryScreen> {
       _groceryItems.remove(item);
     });
 
-    final uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
-        'shopping-list/${item.id}.json');
+    final uri =
+        Uri.https('abc.firebaseio.com', 'shopping-list/${item.id}.json');
 
     final response = await http.delete(uri);
-
-    if (response.statusCode >= 400) {
-      setState(() {
-        _groceryItems.insert(index, item);
-      });
-    }
 
     if (!context.mounted) {
       return;
     }
 
-    ScaffoldMessenger.of(context).clearSnackBars();
+    if (response.statusCode >= 400) {
+      setState(() {
+        _groceryItems.insert(index, item);
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(
-          seconds: 2,
+      ScaffoldMessenger.of(context).clearSnackBars();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(
+            seconds: 2,
+          ),
+          content: Text(
+            'There was a problem deleting the item',
+          ),
         ),
-        content: const Text(
-          'Grocery Item deleted!',
-        ),
-        action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () {
-              setState(() {
-                _groceryItems.insert(index, item);
-              });
-            }),
-      ),
-    );
+      );
+    }
   }
 
   @override
