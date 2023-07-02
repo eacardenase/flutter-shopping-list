@@ -26,46 +26,52 @@ class _GroceryScreenState extends State<GroceryScreen> {
   void _getItems() async {
     final uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
         'shopping-list.json');
-    final response = await http.get(uri);
-    final List<GroceryItem> loadedItems = [];
 
-    if (response.body == 'null') {
+    try {
+      final response = await http.get(uri);
+      final List<GroceryItem> loadedItems = [];
+
+      if (response.body == 'null') {
+        setState(() {
+          _isLoading = false;
+        });
+
+        return;
+      }
+
+      final Map<String, dynamic> listItems = json.decode(response.body);
+
+      if (response.statusCode >= 400) {
+        setState(() {
+          _error = 'Failed to load items. Please try again later.';
+        });
+      }
+
+      for (var item in listItems.entries) {
+        final category = categories.entries
+            .firstWhere((itemCategory) =>
+                itemCategory.value.title == item.value['category'])
+            .value;
+
+        final groceryItem = GroceryItem(
+          id: item.key,
+          name: item.value['name'],
+          quantity: item.value['quantity'],
+          category: category,
+        );
+
+        loadedItems.add(groceryItem);
+      }
+
       setState(() {
+        _groceryItems = loadedItems;
         _isLoading = false;
       });
-
-      return;
-    }
-
-    final Map<String, dynamic> listItems = json.decode(response.body);
-
-    if (response.statusCode >= 400) {
+    } catch (error) {
       setState(() {
-        _error = 'Failed to load items. Please try again later.';
+        _error = 'Something went wrong. Please try again later.';
       });
     }
-
-    for (var item in listItems.entries) {
-      final category = categories.entries
-          .firstWhere((itemCategory) =>
-              itemCategory.value.title == item.value['category'])
-          .value;
-
-      final groceryItem = GroceryItem(
-        id: item.key,
-        name: item.value['name'],
-        quantity: item.value['quantity'],
-        // category: categories[item.value['category']]!,
-        category: category,
-      );
-
-      loadedItems.add(groceryItem);
-    }
-
-    setState(() {
-      _groceryItems = loadedItems;
-      _isLoading = false;
-    });
   }
 
   void _addItem(BuildContext context) async {
