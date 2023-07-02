@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
-import 'package:shopping_list/models/grocery_item.dart';
 
 class NewItemForm extends StatelessWidget {
   const NewItemForm({super.key});
@@ -18,7 +17,7 @@ class NewItemForm extends StatelessWidget {
     var enteredQuantity = 1;
     var selectedCategory = categories[Categories.vegetables];
 
-    void saveItem() {
+    void saveItem() async {
       final isValid = formKey.currentState!.validate();
 
       if (isValid) {
@@ -27,9 +26,11 @@ class NewItemForm extends StatelessWidget {
         var uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
             'shopping-list.json');
 
-        http.post(
+        final response = await http.post(
           uri,
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: json.encode({
             'name': enteredName,
             'quantity': enteredQuantity,
@@ -37,7 +38,14 @@ class NewItemForm extends StatelessWidget {
           }),
         );
 
-        // Navigator.of(context).pop();
+        print(response.body);
+        print(response.statusCode);
+
+        if (!context.mounted) {
+          return;
+        }
+
+        Navigator.of(context).pop();
       }
     }
 

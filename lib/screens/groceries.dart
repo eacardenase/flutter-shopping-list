@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import 'package:http/http.dart' as http;
+
+import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/screens/new_item.dart';
 import 'package:shopping_list/widgets/grocery_list.dart';
 import 'package:shopping_list/models/grocery_item.dart';
@@ -14,22 +19,45 @@ class GroceryScreen extends StatefulWidget {
 }
 
 class _GroceryScreenState extends State<GroceryScreen> {
-  final List<GroceryItem> _groceryItems = [];
+  List<GroceryItem> _groceryItems = [];
+
+  void _getItems() async {
+    final uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
+        'shopping-list.json');
+    final response = await http.get(uri);
+    final List<GroceryItem> loadedItems = [];
+    final Map<String, dynamic> listItems = json.decode(response.body);
+
+    for (var item in listItems.entries) {
+      final category = categories.entries
+          .firstWhere((itemCategory) =>
+              itemCategory.value.title == item.value['category'])
+          .value;
+
+      final groceryItem = GroceryItem(
+        id: item.key,
+        name: item.value['name'],
+        quantity: item.value['quantity'],
+        // category: categories[item.value['category']]!,
+        category: category,
+      );
+
+      loadedItems.add(groceryItem);
+    }
+
+    setState(() {
+      _groceryItems = loadedItems;
+    });
+  }
 
   void _addItem(BuildContext context) async {
-    final newItem = await Navigator.of(context).push<GroceryItem>(
+    await Navigator.of(context).push<GroceryItem>(
       MaterialPageRoute(
         builder: (context) => const NewItemScreen(),
       ),
     );
 
-    if (newItem == null) {
-      return;
-    }
-
-    setState(() {
-      _groceryItems.add(newItem);
-    });
+    _getItems();
   }
 
   void _removeItem(int index, GroceryItem item) {
@@ -56,6 +84,13 @@ class _GroceryScreenState extends State<GroceryScreen> {
             }),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getItems();
   }
 
   @override
