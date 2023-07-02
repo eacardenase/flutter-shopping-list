@@ -28,6 +28,15 @@ class _GroceryScreenState extends State<GroceryScreen> {
         'shopping-list.json');
     final response = await http.get(uri);
     final List<GroceryItem> loadedItems = [];
+
+    if (response.body == 'null') {
+      setState(() {
+        _isLoading = false;
+      });
+
+      return;
+    }
+
     final Map<String, dynamic> listItems = json.decode(response.body);
 
     if (response.statusCode >= 400) {
@@ -80,8 +89,8 @@ class _GroceryScreenState extends State<GroceryScreen> {
       _groceryItems.remove(item);
     });
 
-    final uri =
-        Uri.https('abc.firebaseio.com', 'shopping-list/${item.id}.json');
+    final uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
+        'shopping-list/${item.id}.json');
 
     final response = await http.delete(uri);
 
