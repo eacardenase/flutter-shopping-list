@@ -75,10 +75,25 @@ class _GroceryScreenState extends State<GroceryScreen> {
     });
   }
 
-  void _removeItem(int index, GroceryItem item) {
+  void _removeItem(int index, GroceryItem item) async {
     setState(() {
       _groceryItems.remove(item);
     });
+
+    final uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
+        'shopping-list/${item.id}.json');
+
+    final response = await http.delete(uri);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _groceryItems.insert(index, item);
+      });
+    }
+
+    if (!context.mounted) {
+      return;
+    }
 
     ScaffoldMessenger.of(context).clearSnackBars();
 
