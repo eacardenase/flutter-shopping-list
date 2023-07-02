@@ -21,6 +21,7 @@ class GroceryScreen extends StatefulWidget {
 class _GroceryScreenState extends State<GroceryScreen> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
+  String? _error;
 
   void _getItems() async {
     final uri = Uri.https('shopping-list-9f8d7-default-rtdb.firebaseio.com',
@@ -28,6 +29,12 @@ class _GroceryScreenState extends State<GroceryScreen> {
     final response = await http.get(uri);
     final List<GroceryItem> loadedItems = [];
     final Map<String, dynamic> listItems = json.decode(response.body);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _error = 'Failed to load items. Please try again later.';
+      });
+    }
 
     for (var item in listItems.entries) {
       final category = categories.entries
@@ -122,6 +129,17 @@ class _GroceryScreenState extends State<GroceryScreen> {
       mainContent = GroceryList(
         groceryItems: _groceryItems,
         onRemoveItem: _removeItem,
+      );
+    }
+
+    if (_error != null) {
+      mainContent = Center(
+        child: Text(
+          _error!,
+          style: const TextStyle(
+            fontSize: 16,
+          ),
+        ),
       );
     }
 
