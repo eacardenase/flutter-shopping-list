@@ -24,6 +24,18 @@ class GroceryList extends StatelessWidget {
           onDismissed: (direction) {
             onRemoveItem(index, groceryItem);
           },
+          background: Container(
+            padding: const EdgeInsets.only(left: 10),
+            color: Colors.green.shade300,
+            alignment: Alignment.centerLeft,
+            child: const Icon(Icons.check),
+          ),
+          secondaryBackground: Container(
+            padding: const EdgeInsets.only(right: 20),
+            color: Colors.red.shade300,
+            alignment: Alignment.centerRight,
+            child: const Icon(Icons.delete),
+          ),
           child: ListTile(
             title: Text(
               groceryItem.name,
